@@ -1,6 +1,5 @@
 import pygame as pg  # импорт библиотеки pygame
 import random as rd  # импорт библиотеки random
-pg.mixer.init()
 
 clock = pg.time.Clock()  # обращение к классу
 
@@ -9,18 +8,18 @@ width = 1300  # ширина
 height = 790  # высота
 win = pg.display.set_mode((1300, 790), flags=pg.NOFRAME)  # дисплэй
 pg.display.set_caption('Mario')  # название для игры
-pg.display.set_icon(pg.image.load('images/incon.png'))  # иконка игры
-bg = pg.image.load('images/fon.png').convert_alpha()  # задний фон
+pg.display.set_icon(pg.image.load('images/Details/incon.png'))  # иконка игры
+bg = pg.image.load('images/Details/fon.png').convert_alpha()  # задний фон
 
 mushroom_images = [
-    pg.image.load('details/mushroom1.png').convert_alpha(),
-    pg.image.load('details/mushroom2.png').convert_alpha()
+    pg.image.load('images/details/mushroom1.png').convert_alpha(),
+    pg.image.load('images/details/mushroom2.png').convert_alpha()
 ]  # добавление гриба
 
 cloud_images = [
-    pg.image.load('images/cloud1.png').convert_alpha(),
-    pg.image.load('images/cloud2.png').convert_alpha(),
-    pg.image.load('images/cloud3.png').convert_alpha()
+    pg.image.load('images/Cloud/cloud1.png').convert_alpha(),
+    pg.image.load('images/Cloud/cloud2.png').convert_alpha(),
+    pg.image.load('images/Cloud/cloud3.png').convert_alpha()
 ]  # добавление облаков
 
 walk_right = [
@@ -44,10 +43,21 @@ walk_left = [
 ]  # Марио повернутый в лево
 
 
-font = pg.font.Font('images/text.ttf', 70)  # шрифт и размер текста
+text = 'Game Over'  # текст
+color = (152, 0, 2)  # цвет
+x = 500
+y = 310
 
+font = pg.font.Font('images/Details/text.ttf', 70)  # шрифт и размер текста
 game_paused = False
-paused_text = font.render('The game is suspended', True, (152, 0, 2))  # надпись и размер текста
+paused_text = font.render('The game is suspended', True, (0, 32, 255))  # надпись и размер текста
+
+
+def draw_text(surface, text, color, x, y):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect()
+    textrect.topleft = (x, y)
+    surface.blit(textobj, textrect)
 
 
 def draw_paused_win():
@@ -71,17 +81,13 @@ bg_sound.play(loops=-1)  # звук играет бесконечно
 
 jump_sound = pg.mixer.Sound('sounds/jump.mp3')  # звук прыжка
 
+loss_sound = pg.mixer.Sound('sounds/gameover.mp3')  # звук проигрыша
 
-class Mario:  # класс игры
-    def __init__(self, x, y, width, image, speed):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.image = image
-        self.speed = speed
+pause_sound = pg.mixer.Sound('sounds/pause.mp3')
 
-
+game_over = False
 running = True
+
 while running:  # цикл игры
 
     win.blit(bg, (0, 0))  # вывод заднего фона
@@ -90,13 +96,13 @@ while running:  # цикл игры
     win.blit(mushroom_images[1], (840, 464))  # вывод гриба на экран
     win.blit(mushroom_images[1], (400, 728))  # вывод гриба на экран
 
-    win.blit(cloud_images[0], (400, 5))  # вывод облака на экран
+    #win.blit(cloud_images[0], (400, 5))  # вывод облака на экран
 
     player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))  # отрисовка квадрата для игрока
     mushroom_rect = mushroom_images[0].get_rect(topleft=(mushroom_x, mushroom_y))  # отрисовка квадрата для гриба
 
     if player_rect.colliderect(mushroom_rect):
-        print('Game over')
+        draw_text(win, text, color, x, y)
 
     keys = pg.key.get_pressed()  # проверяем нажал ли пользователь на кнопку
     if keys[pg.K_a]:  # если пользователь нажал на "a" то
@@ -132,9 +138,9 @@ while running:  # цикл игры
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-
         elif event.type == pg.KEYDOWN:  #
-            if event.key == pg.K_ESCAPE:  #
+            if event.key == pg.K_ESCAPE:
+                pause_sound.play()  #
                 game_paused = not game_paused  #
 
     if game_paused:
@@ -149,6 +155,10 @@ while running:  # цикл игры
     for event in pg.event.get():  # получаем список из всех возможных событий
         if event.type == pg.QUIT:  # если закрываем приложения то
             running = False  # установливаем для переменной значение False
-            pg.quit()  # обрабатываем выход корректно
+
+    if not game_over and player_rect.colliderect(mushroom_rect):
+        loss_sound.play()  # звук проигрыша
+        draw_text(win, text, color, x, y)
+        game_over = True  # флаг окончания игры
 
     clock.tick(10)  # сколько кадров в секунду будет меняться картинки игрока
