@@ -1,11 +1,12 @@
-import pygame as pg  # импорт библиотеки pygame
-import random as rd  # импорт библиотеки random
+import pygame as pg
+import random as rd
 
 clock = pg.time.Clock()  # обращение к классу
 
 pg.init()  # инициализация игры
-width = 1300  # ширина
-height = 790  # высота
+
+display_width = 1300  # ширина
+display_height = 790  # высота
 win = pg.display.set_mode((1300, 790), flags=pg.NOFRAME)  # дисплэй
 pg.display.set_caption('Mario')  # название для игры
 pg.display.set_icon(pg.image.load('images/Details/incon.png'))  # иконка игры
@@ -67,10 +68,9 @@ def draw_paused_win():
 
 anim_count = 0  # картинка из списка не меняется
 player_speed = 8  # скорость передвижение Марио
-player_x = 10  # координаты по х для Марио
-player_y = 192  # координаты по y для Марио
-mushroom_x = 300  # координаты по х для гриба
-mushroom_y = 203  # координаты по у для гриба
+player_x, player_y = 10, 192  # координаты для Марио
+mushroom_x, mushroom_y = 300, 203   # координаты для гриба
+
 
 jump = False
 jump_count = 5  # на 5 позиций вверх Марио поднимается и отпускается
@@ -83,12 +83,12 @@ jump_sound = pg.mixer.Sound('sounds/jump.mp3')  # звук прыжка
 
 loss_sound = pg.mixer.Sound('sounds/gameover.mp3')  # звук проигрыша
 
-pause_sound = pg.mixer.Sound('sounds/pause.mp3')
+pause_sound = pg.mixer.Sound('sounds/pause.mp3')  # звук паузы
 
 game_over = False
 running = True
 
-while running:  # цикл игры
+while running:
 
     win.blit(bg, (0, 0))  # вывод заднего фона
 
@@ -101,8 +101,8 @@ while running:  # цикл игры
     player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))  # отрисовка квадрата для игрока
     mushroom_rect = mushroom_images[0].get_rect(topleft=(mushroom_x, mushroom_y))  # отрисовка квадрата для гриба
 
-    if player_rect.colliderect(mushroom_rect):
-        draw_text(win, text, color, x, y)
+    if player_rect.colliderect(mushroom_rect):  # если Марио с монстром соприкоснется
+        draw_text(win, text, color, x, y)  # то выводим текст на экран
 
     keys = pg.key.get_pressed()  # проверяем нажал ли пользователь на кнопку
     if keys[pg.K_a]:  # если пользователь нажал на "a" то
@@ -138,10 +138,10 @@ while running:  # цикл игры
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-        elif event.type == pg.KEYDOWN:  #
+        elif event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
-                pause_sound.play()  #
-                game_paused = not game_paused  #
+                pause_sound.play()
+                game_paused = not game_paused
 
     if game_paused:
         draw_paused_win()
