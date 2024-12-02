@@ -1,27 +1,28 @@
 import pygame as pg
 import random as rd
 
-clock = pg.time.Clock()  # обращение к классу
+clock = pg.time.Clock()
 
-pg.init()  # инициализация игры
+pg.init()
 
-display_width = 1300  # ширина
-display_height = 790  # высота
-win = pg.display.set_mode((1300, 790), flags=pg.NOFRAME)  # дисплэй
-pg.display.set_caption('Mario')  # название для игры
-pg.display.set_icon(pg.image.load('images/Details/incon.png'))  # иконка игры
-bg = pg.image.load('images/Details/fon.png').convert_alpha()  # задний фон
+display_width = 1300
+display_height = 790
+win = pg.display.set_mode((display_height, display_width), flags=pg.NOFRAME)
+
+pg.display.set_caption('Mario')
+pg.display.set_icon(pg.image.load('images/Details/incon.png'))
+bg = pg.image.load('images/Details/fon.png').convert_alpha()
 
 mushroom_images = [
     pg.image.load('images/details/mushroom1.png').convert_alpha(),
     pg.image.load('images/details/mushroom2.png').convert_alpha()
-]  # добавление гриба
+]
 
 cloud_images = [
     pg.image.load('images/Cloud/cloud1.png').convert_alpha(),
     pg.image.load('images/Cloud/cloud2.png').convert_alpha(),
     pg.image.load('images/Cloud/cloud3.png').convert_alpha()
-]  # добавление облаков
+]
 
 walk_right = [
     pg.image.load('images/mario/mario1.png').convert_alpha(),
@@ -31,7 +32,7 @@ walk_right = [
     pg.image.load('images/mario/mario5.png').convert_alpha(),
     pg.image.load('images/mario/mario6.png').convert_alpha(),
     pg.image.load('images/mario/mario7.png').convert_alpha()
-]  # Марио повернутый в право
+]
 
 walk_left = [
     pg.image.load('images/mario2/mario1.png').convert_alpha(),
@@ -41,17 +42,16 @@ walk_left = [
     pg.image.load('images/mario2/mario5.png').convert_alpha(),
     pg.image.load('images/mario2/mario6.png').convert_alpha(),
     pg.image.load('images/mario2/mario7.png').convert_alpha()
-]  # Марио повернутый в лево
+]
 
 
-text = 'Game Over'  # текст
-color = (152, 0, 2)  # цвет
+text = 'Game Over'
+color = (152, 0, 2)
 x = 500
 y = 310
 
-font = pg.font.Font('images/Details/text.ttf', 70)  # шрифт и размер текста
-game_paused = False
-paused_text = font.render('The game is suspended', True, (0, 32, 255))  # надпись и размер текста
+font = pg.font.Font('images/Details/text.ttf', 70)
+paused_text = font.render('The game is suspended', True, (0, 32, 255))
 
 
 def draw_text(surface, text, color, x, y):
@@ -66,74 +66,71 @@ def draw_paused_win():
     pg.display.flip()
 
 
-anim_count = 0  # картинка из списка не меняется
-player_speed = 8  # скорость передвижение Марио
-player_x, player_y = 10, 192  # координаты для Марио
-mushroom_x, mushroom_y = 300, 203   # координаты для гриба
+anim_count = 0
+player_speed = 8
+player_x, player_y = 10, 192
+mushroom_x, mushroom_y = 300, 203
+jump_count = 5
 
 
-jump = False
-jump_count = 5  # на 5 позиций вверх Марио поднимается и отпускается
+bg_sound = pg.mixer.Sound('sounds/background.mp3')
+bg_sound.play(loops=-1)
+jump_sound = pg.mixer.Sound('sounds/jump.mp3')
+loss_sound = pg.mixer.Sound('sounds/gameover.mp3')
+pause_sound = pg.mixer.Sound('sounds/pause.mp3')
 
-
-bg_sound = pg.mixer.Sound('sounds/background.mp3')  # звук игры
-bg_sound.play(loops=-1)  # звук играет бесконечно
-
-jump_sound = pg.mixer.Sound('sounds/jump.mp3')  # звук прыжка
-
-loss_sound = pg.mixer.Sound('sounds/gameover.mp3')  # звук проигрыша
-
-pause_sound = pg.mixer.Sound('sounds/pause.mp3')  # звук паузы
 
 game_over = False
 running = True
+game_paused = False
+jump = False
+
 
 while running:
 
-    win.blit(bg, (0, 0))  # вывод заднего фона
+    win.blit(bg, (0, 0))
 
-    win.blit(mushroom_images[0], (mushroom_x, mushroom_y))  # вывод гриба на экран
-    win.blit(mushroom_images[1], (840, 464))  # вывод гриба на экран
-    win.blit(mushroom_images[1], (400, 728))  # вывод гриба на экран
+    win.blit(mushroom_images[0], (mushroom_x, mushroom_y))
+    win.blit(mushroom_images[1], (840, 464))
+    win.blit(mushroom_images[1], (400, 728))
+    win.blit(cloud_images[0], (400, 5))
 
-    #win.blit(cloud_images[0], (400, 5))  # вывод облака на экран
+    player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))
+    mushroom_rect = mushroom_images[0].get_rect(topleft=(mushroom_x, mushroom_y))
 
-    player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))  # отрисовка квадрата для игрока
-    mushroom_rect = mushroom_images[0].get_rect(topleft=(mushroom_x, mushroom_y))  # отрисовка квадрата для гриба
+    if player_rect.colliderect(mushroom_rect):
+        draw_text(win, text, color, x, y)
 
-    if player_rect.colliderect(mushroom_rect):  # если Марио с монстром соприкоснется
-        draw_text(win, text, color, x, y)  # то выводим текст на экран
+    keys = pg.key.get_pressed()
+    if keys[pg.K_a]:
+        win.blit(walk_left[anim_count], (player_x, player_y))
+    else:
+        win.blit(walk_right[anim_count], (player_x, player_y))
 
-    keys = pg.key.get_pressed()  # проверяем нажал ли пользователь на кнопку
-    if keys[pg.K_a]:  # если пользователь нажал на "a" то
-        win.blit(walk_left[anim_count], (player_x, player_y))  # выводим игрока на экран
-    else:  # иначе
-        win.blit(walk_right[anim_count], (player_x, player_y))  # выводим игрока на экран
+    if keys[pg.K_a] and player_x > 1:
+        player_x -= player_speed
+    elif keys[pg.K_d] and player_x < 1280:
+        player_x += player_speed
 
-    if keys[pg.K_a] and player_x > 1:  # если пользователь нажал на клавишу 'a' то
-        player_x -= player_speed  # Марио идет назад
-    elif keys[pg.K_d] and player_x < 1280:  # если пользователь нажал на клавишу 'd' то
-        player_x += player_speed  # игрок идет вперед
-
-    if not jump:  # проверка на значение
-        if keys[pg.K_SPACE]:  # если пользователь нажал на пробел
-            jump = True  # то Марио прыгает
+    if not jump:
+        if keys[pg.K_SPACE]:
+            jump = True
             jump_sound.play()
-    else:  # иначе
-        if jump_count >= -5:  # условие будет выполняться до тех пор пока значение не будет -5
-            if jump_count > 0:  # если переменная будет больше 0
-                player_y -= (jump_count ** 2) / 2  # то поднимаем  игрока
-            else:  # иначе
-                player_y += (jump_count ** 2) / 2  # отпускаем игрока
-            jump_count -= 1  # переменную уменьшаем на 1
-        else:  # иначе
-            jump = False  # завершение прыжка
-            jump_count = 5  # обнуляем до первоночального числа
+    else:
+        if jump_count >= -5:
+            if jump_count > 0:
+                player_y -= (jump_count ** 2) / 2
+            else:
+                player_y += (jump_count ** 2) / 2
+            jump_count -= 1
+        else:
+            jump = False
+            jump_count = 5
 
-    if anim_count == 6:  # если переменная == 6 значений
-        anim_count = 0  # то оно обнавляется и обратно начанает с нуля
-    elif keys[pg.K_a] or keys[pg.K_d]:  # иначе если пользователь нажал на 'a' или 'd' то
-        anim_count += 1  # меняем элементы из списка
+    if anim_count == 6:
+        anim_count = 0
+    elif keys[pg.K_a] or keys[pg.K_d]:
+        anim_count += 1
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -148,17 +145,17 @@ while running:
     else:
         pass
 
-    mushroom_x -= 2  # скорость движения гриба
+    mushroom_x -= 2
 
-    pg.display.update()  # обновление дисплэя
+    pg.display.update()
 
-    for event in pg.event.get():  # получаем список из всех возможных событий
-        if event.type == pg.QUIT:  # если закрываем приложения то
-            running = False  # установливаем для переменной значение False
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            running = False
 
     if not game_over and player_rect.colliderect(mushroom_rect):
-        loss_sound.play()  # звук проигрыша
+        loss_sound.play()
         draw_text(win, text, color, x, y)
-        game_over = True  # флаг окончания игры
+        game_over = True
 
-    clock.tick(10)  # сколько кадров в секунду будет меняться картинки игрока
+    clock.tick(10)
