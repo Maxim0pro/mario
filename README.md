@@ -4,11 +4,9 @@ import random as rd
 clock = pg.time.Clock()
 
 pg.init()
-
 display_width = 1300
 display_height = 790
-win = pg.display.set_mode((display_height, display_width), flags=pg.NOFRAME)
-
+win = pg.display.set_mode((1300, 790), flags=pg.NOFRAME)
 pg.display.set_caption('Mario')
 pg.display.set_icon(pg.image.load('images/Details/incon.png'))
 bg = pg.image.load('images/Details/fon.png').convert_alpha()
@@ -66,10 +64,12 @@ def draw_paused_win():
     pg.display.flip()
 
 
-anim_count = 0
-player_speed = 8
+anim_count = 0  # картинка из списка не меняется
+player_speed = 8  # скорость передвижение Марио
 player_x, player_y = 10, 192
 mushroom_x, mushroom_y = 300, 203
+
+
 jump_count = 5
 
 
@@ -80,11 +80,10 @@ loss_sound = pg.mixer.Sound('sounds/gameover.mp3')
 pause_sound = pg.mixer.Sound('sounds/pause.mp3')
 
 
-game_over = False
-running = True
 game_paused = False
 jump = False
-
+game_over = False
+running = True
 
 while running:
 
@@ -93,7 +92,8 @@ while running:
     win.blit(mushroom_images[0], (mushroom_x, mushroom_y))
     win.blit(mushroom_images[1], (840, 464))
     win.blit(mushroom_images[1], (400, 728))
-    win.blit(cloud_images[0], (400, 5))
+
+    #win.blit(cloud_images[0], (400, 5))
 
     player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))
     mushroom_rect = mushroom_images[0].get_rect(topleft=(mushroom_x, mushroom_y))
