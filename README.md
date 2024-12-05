@@ -2,14 +2,16 @@ import pygame as pg
 import random as rd
 
 clock = pg.time.Clock()
-
 pg.init()
+
 display_width = 1300
 display_height = 790
-win = pg.display.set_mode((1300, 790), flags=pg.NOFRAME)
+win = pg.display.set_mode((display_width, display_height), flags=pg.NOFRAME)
 pg.display.set_caption('Mario')
 pg.display.set_icon(pg.image.load('images/Details/incon.png'))
-bg = pg.image.load('images/Details/fon.png').convert_alpha()
+
+bg_image = pg.image.load('images/Details/fon.png').convert_alpha()
+xp_image = pg.image.load('images/Details/xp.png')
 
 mushroom_images = [
     pg.image.load('images/details/mushroom1.png').convert_alpha(),
@@ -22,7 +24,7 @@ cloud_images = [
     pg.image.load('images/Cloud/cloud3.png').convert_alpha()
 ]
 
-walk_right = [
+mario_right = [
     pg.image.load('images/mario/mario1.png').convert_alpha(),
     pg.image.load('images/mario/mario2.png').convert_alpha(),
     pg.image.load('images/mario/mario3.png').convert_alpha(),
@@ -32,7 +34,7 @@ walk_right = [
     pg.image.load('images/mario/mario7.png').convert_alpha()
 ]
 
-walk_left = [
+mario_left = [
     pg.image.load('images/mario2/mario1.png').convert_alpha(),
     pg.image.load('images/mario2/mario2.png').convert_alpha(),
     pg.image.load('images/mario2/mario3.png').convert_alpha(),
@@ -45,8 +47,8 @@ walk_left = [
 
 text = 'Game Over'
 color = (152, 0, 2)
-x = 500
-y = 310
+text_x = 500
+text_y = 310
 
 font = pg.font.Font('images/Details/text.ttf', 70)
 paused_text = font.render('The game is suspended', True, (0, 32, 255))
@@ -64,12 +66,10 @@ def draw_paused_win():
     pg.display.flip()
 
 
-anim_count = 0  # картинка из списка не меняется
-player_speed = 8  # скорость передвижение Марио
-player_x, player_y = 10, 192
+anim_count = 0
+mario_speed = 8
+mario_x, mario_y = 10, 192
 mushroom_x, mushroom_y = 300, 203
-
-
 jump_count = 5
 
 
@@ -79,38 +79,39 @@ jump_sound = pg.mixer.Sound('sounds/jump.mp3')
 loss_sound = pg.mixer.Sound('sounds/gameover.mp3')
 pause_sound = pg.mixer.Sound('sounds/pause.mp3')
 
-
 game_paused = False
 jump = False
 game_over = False
 running = True
 
+
 while running:
 
-    win.blit(bg, (0, 0))
-
+    win.blit(bg_image, (0, 0))
     win.blit(mushroom_images[0], (mushroom_x, mushroom_y))
     win.blit(mushroom_images[1], (840, 464))
     win.blit(mushroom_images[1], (400, 728))
-
+    xp_positions = [(20, 20), (55, 20), (90, 20)]
+    for pos in xp_positions:
+        win.blit(xp_image, pos)
     #win.blit(cloud_images[0], (400, 5))
 
-    player_rect = walk_left[0].get_rect(topleft=(player_x, player_y))
+    player_rect = mario_left[0].get_rect(topleft=(mario_x, mario_y))
     mushroom_rect = mushroom_images[0].get_rect(topleft=(mushroom_x, mushroom_y))
 
     if player_rect.colliderect(mushroom_rect):
-        draw_text(win, text, color, x, y)
+        draw_text(win, text, color, text_x, text_y)
 
     keys = pg.key.get_pressed()
     if keys[pg.K_a]:
-        win.blit(walk_left[anim_count], (player_x, player_y))
+        win.blit(mario_left[anim_count], (mario_x, mario_y))
     else:
-        win.blit(walk_right[anim_count], (player_x, player_y))
+        win.blit(mario_right[anim_count], (mario_x, mario_y))
 
-    if keys[pg.K_a] and player_x > 1:
-        player_x -= player_speed
-    elif keys[pg.K_d] and player_x < 1280:
-        player_x += player_speed
+    if keys[pg.K_a] and mario_x > 1:
+        mario_x -= mario_speed
+    elif keys[pg.K_d] and mario_x < 1280:
+        mario_x += mario_speed
 
     if not jump:
         if keys[pg.K_SPACE]:
@@ -119,9 +120,9 @@ while running:
     else:
         if jump_count >= -5:
             if jump_count > 0:
-                player_y -= (jump_count ** 2) / 2
+                mario_y -= (jump_count ** 2) / 2
             else:
-                player_y += (jump_count ** 2) / 2
+                mario_y += (jump_count ** 2) / 2
             jump_count -= 1
         else:
             jump = False
@@ -140,7 +141,7 @@ while running:
                 pause_sound.play()
                 game_paused = not game_paused
 
-    if game_paused:
+    if game_paused and not game_over:
         draw_paused_win()
     else:
         pass
@@ -155,7 +156,7 @@ while running:
 
     if not game_over and player_rect.colliderect(mushroom_rect):
         loss_sound.play()
-        draw_text(win, text, color, x, y)
+        draw_text(win, text, color, text_x, text_y)
         game_over = True
 
     clock.tick(10)
