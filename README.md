@@ -81,7 +81,7 @@ border_left = 0
 border_right = display_height
 border_top = 0
 border_bottom = 50
-mushroom_direction = display_height != 2
+mushroom_direction = 1
 mushroom_speed = 2
 mushroom_frame = 0
 animation_speed = 30
@@ -89,6 +89,8 @@ star_time = 64
 current_time = star_time
 fall_border_x = 1210
 floor_y = 455
+
+
 text = 'Game Over'
 color = (152, 0, 2)
 text_x, text_y = 500, 310
@@ -230,5 +232,5 @@ while running:
         draw_text(win, text, color, text_x, text_y)
         game_over = True
 
-    clock.tick(65)
+    clock.tick(15)
     pg.display.update()
